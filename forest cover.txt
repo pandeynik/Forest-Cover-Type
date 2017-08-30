@@ -1,0 +1,346 @@
+setwd("C:/Users/Nikhil/Desktop/data analyst/R/Forest Cover Type Prediction")
+#Imporing data 
+forest_train=read.csv("train.csv")
+forest_test=read.csv("test.csv")
+head(forest_train, n=10)
+library(dplyr) # for manipulating data
+library(ggplot2) # for visualization 
+
+# First Data Exploration
+
+##dermining no of rows in each cover type of forest
+ggplot(forest_train,  aes(x = Cover_Type, fill= Cover_Type ) ) + geom_bar()+ ggtitle("Count of No. Cover Type") +
+  xlab("Cover Type") + ylab("Count")
+## here all the column are data. frame. to use fill (fill option take only categorical data)
+##option we have to
+## convert catagorical variable into factor.
+
+##converting class of categorical variable in forest_train
+## this can be done by using to step
+## First is  by using using lapply 
+class(forest_train)
+cols= c(forest_train$Wilderness_Area1:forest_train$Cover_Type)
+cols= c("Wilderness_Area1", "Wilderness_Area2",	"Wilderness_Area3",	"Wilderness_Area4",
+"Soil_Type1",	"Soil_Type2",	"Soil_Type3",	"Soil_Type4",	
+"Soil_Type5",	"Soil_Type6",	"Soil_Type7",	"Soil_Type8",	"Soil_Type9",
+"Soil_Type10",	"Soil_Type11",	"Soil_Type12",	"Soil_Type13",
+"Soil_Type14",	"Soil_Type15",	"Soil_Type16",	
+"Soil_Type17",	"Soil_Type18", "Soil_Type19",	"Soil_Type20",	
+"Soil_Type21",	"Soil_Type22",
+"Soil_Type23",	"Soil_Type24",	"Soil_Type25",	"Soil_Type26",	
+"Soil_Type27",	"Soil_Type28",	"Soil_Type29"
+, "Soil_Type30",	"Soil_Type31",	"Soil_Type32",
+"Soil_Type33",	"Soil_Type34",	"Soil_Type35",
+"Soil_Type36",	"Soil_Type37",	"Soil_Type38",
+"Soil_Type39",	"Soil_Type40",	"Cover_Type")
+forest_train[cols]=lapply(forest_train[cols], factor)
+sapply(forest_train, class )
+
+##second by using For loop
+for(i in c(12:56)) {
+  forest_train[,i] <- as.factor(forest_train[,i])
+}
+
+
+
+## Creating a column  having true value of Wilderness Area in a single column.
+forest_train_1=forest_train %>% mutate(Wilderness_Area= ifelse(Wilderness_Area1==1,"WA1", 
+  ifelse(Wilderness_Area2==1,"WA2", ifelse(Wilderness_Area3==1,"WA3", 
+            ifelse(Wilderness_Area4==1,"WA4","0")))))
+
+##plot as per wildnerness area type and cover type
+ggplot(forest_train_1, aes(Wilderness_Area, fill= Cover_Type)) + geom_bar()+ggtitle("Count of Cover Type as per Different Wilderness Area") +
+  xlab("Type Of Wilderness Area") + ylab("Count")
+
+## plot as per wilderness Area type and cover type with 100% stack
+ggplot(forest_train_1, aes(Wilderness_Area, fill= Cover_Type)) + 
+  geom_bar(position = "fill") +ggtitle("Count of Cover Type as per Different Wilderness Area in 100% stack Bar Graph") +
+  xlab("Type Of Wilderness Area") + ylab("Count")
+##insight is cover type 3,4,6 dominating in WA4
+#in WA2, 1,7,2 is dominating cover type
+##in WA1 1,2,5,7 is dominating
+## WA4 ismixture of all type of cover type
+
+## plot cover type vs Horizental distance mean.
+ggplot(forest_train_1, aes(Cover_Type,Horizontal_Distance_To_Hydrology, Fill=Cover_Type)) + 
+  geom_bar(stat = "summary", fun.y= "mean")+ggtitle("Mean Horizontal Distance of each cover type from Hydrology ") +
+  xlab("Cover Type") + ylab("Mean Distance")
+##insight is cover type 4 is neareast to hydrology horizontaly
+#### and cover type 7 is farthest to hydrology vertically
+
+
+## plot cover type vs Horizental distance mean.
+ggplot(forest_train_1, aes(Cover_Type,Vertical_Distance_To_Hydrology, Fill=Cover_Type)) + 
+  geom_bar(stat = "summary", fun.y= "mean")+ggtitle("Mean Vertical Distance of each cover type from Hydrology ") +
+  xlab("Cover Type") + ylab("Mean Distance")
+ ##insight is cover type 4 is neareast to hydrology vertically
+## and cover type 7 is farthest to hydrology vertically 
+
+
+
+##plot cover type vs horizontal distance to roadways 
+ggplot(forest_train_1, aes(Cover_Type,Horizontal_Distance_To_Roadways, Fill=Cover_Type)) + 
+  geom_bar(stat = "summary", fun.y= "mean")+ggtitle("Mean  Distance of each cover type from Roadways ") +
+  xlab("Cover Type") + ylab("Mean Distance")
+
+## plot cover type vs horizontal distance to fire point
+ggplot(forest_train_1, aes(Cover_Type,Horizontal_Distance_To_Fire_Points, Fill=Cover_Type)) + 
+  geom_bar(stat = "summary", fun.y= "mean")+ggtitle("Mean Distance of each cover type from Fire Point ") +
+  xlab("Cover Type") + ylab("Mean Distance")
+
+## plot cover type vs Elevation
+ggplot(forest_train_1, aes(Cover_Type,Elevation, Fill=Cover_Type)) + 
+  geom_bar(stat = "summary", fun.y= "mean") +ggtitle("Mean Elevation ") +
+  xlab("Cover Type") + ylab("Mean Elevation")
+
+## plot cover type vs Aspect
+ggplot(forest_train_1, aes(Cover_Type, Aspect, Fill=Cover_Type)) + 
+  geom_bar(stat = "summary", fun.y= "mean")+ggtitle("Mean Aspect ") +
+  xlab("Cover Type") + ylab("Aspect")
+
+## plot cover type and hil shade at 9 am , noon, 3pm
+ggplot(forest_train_1, aes(Cover_Type, Hillshade_9am, Fill=Cover_Type)) + 
+  geom_bar(stat = "summary", fun.y= "mean")+ggtitle("cover type at hill shade 9 am") +
+  xlab("Cover Type") + ylab("Hill Shade")
+ggplot(forest_train_1, aes(Cover_Type, Hillshade_Noon, Fill=Cover_Type)) + 
+  geom_bar(stat = "summary", fun.y= "mean")+ggtitle("Mean Aspect ") +
+  xlab("Cover Type") + ylab("Aspect")
+ggplot(forest_train_1, aes(Cover_Type, Hillshade_3pm, Fill=Cover_Type)) + 
+  geom_bar(stat = "summary", fun.y= "mean")+ggtitle("Mean Aspect ") +
+  xlab("Cover Type") + ylab("Aspect")
+
+
+
+
+
+
+####################################################################################
+#########################    Decision Tree        ##################################
+###################################################################################
+## to read data
+install.packages("readr")
+## for tree algorithm
+install.packages("party")
+install.packages("rpart")
+install.packages("rpart.plot")
+install.packages("ROCR")
+
+library(readr)
+library(dplyr)
+library(rpart)
+library(party)
+library(rpart.plot)
+library(ROCR)
+set.seed(100)
+
+##fitting decision treefor finding the significant parameter. don't include ID column as their is no significance of that
+rtree_fit_all= rpart(Cover_Type~.-Id 	, data=forest_train,  method = "class")
+
+##plot of Decision tree
+rpart.plot(rtree_fit_all,main="Main Tree Plot")
+## elevation>= 2878 is comes out as most significant parameter
+## complexicity Parameter (CP)
+printcp(rtree_fit_all)
+plotcp(rtree_fit_all,main="CP value Chart of Main Tree")
+
+##prediction of cover type in test dataset with the help of pridict function
+pred_all=predict(rtree_fit_all,forest_train, type = "class")
+table(pred_all)
+##saving final result of decision tree
+write.csv(pred_all,"final_result_decision_tree.csv")
+
+##confusion matrix of decision tree to check accuracy of decision model
+c.m_1=table(pred_all, forest_train$Cover_Type)
+c.m_1
+Accuracy_1= ((c.m_1[1,1]+c.m_1[2,2]+c.m_1[3,3]+c.m_1[4,4]+c.m_1[5,5]+c.m_1[6,6]+c.m_1[7,7])/
+               (c.m_1[1,1]+c.m_1[1,2]+c.m_1[1,3]+c.m_1[1,4]+c.m_1[1,5]+c.m_1[1,6]+c.m_1[1,7]+
+                  c.m_1[2,1]+c.m_1[2,2]+c.m_1[2,3]+c.m_1[2,4]+c.m_1[2,5]+c.m_1[2,6]+c.m_1[2,7]+
+                  c.m_1[3,1]+c.m_1[3,2]+c.m_1[3,3]+c.m_1[3,4]+c.m_1[3,5]+c.m_1[3,6]+c.m_1[3,7]+
+                  c.m_1[4,1]+c.m_1[4,2]+c.m_1[4,3]+c.m_1[4,4]+c.m_1[4,5]+c.m_1[4,6]+c.m_1[4,7]+
+                  c.m_1[5,1]+c.m_1[5,2]+c.m_1[5,3]+c.m_1[5,4]+c.m_1[5,5]+c.m_1[5,6]+c.m_1[5,7]+
+                  c.m_1[6,1]+c.m_1[6,2]+c.m_1[6,3]+c.m_1[6,4]+c.m_1[6,5]+c.m_1[6,6]+c.m_1[6,7]+
+                  c.m_1[7,1]+c.m_1[7,2]+c.m_1[7,3]+c.m_1[7,4]+c.m_1[7,5]+c.m_1[7,6]+c.m_1[7,7]))
+Accuracy_1
+##63.86%
+## accuracy of decision tree comes out near 64% without pruning.
+## lets start pruning the decision tree to improve the accuracy of decision tree
+
+
+##prune decision tree on the basis of 'CP' value.
+## start pruning tree from lowest 'CP' value.
+rtree_fit_prune_1= rpart(Cover_Type~.-Id 	, data=forest_train,  method = "class", cp=0.010494)
+rpart.plot(rtree_fit_prune_1,main="Tree After first Pruning")
+printcp(rtree_fit_prune_1)
+plotcp(rtree_fit_prune_1)
+pred_prune_1=predict(rtree_fit_prune_1,forest_train, type = "class")
+table(pred_prune_1)
+c.m_prun_1=table(pred_prune_1, forest_train$Cover_Type)
+c.m_prun_1
+
+Accuracy_p1= ((c.m_prun_1[1,1]+c.m_prun_1[2,2]+c.m_prun_1[3,3]+c.m_prun_1[4,4]+c.m_prun_1[5,5]+c.m_prun_1[6,6]+c.m_prun_1[7,7])/
+             (c.m_prun_1[1,1]+c.m_prun_1[1,2]+c.m_prun_1[1,3]+c.m_prun_1[1,4]+c.m_prun_1[1,5]+c.m_prun_1[1,6]+c.m_prun_1[1,7]+
+                c.m_prun_1[2,1]+c.m_prun_1[2,2]+c.m_prun_1[2,3]+c.m_prun_1[2,4]+c.m_prun_1[2,5]+c.m_prun_1[2,6]+c.m_prun_1[2,7]+
+                c.m_prun_1[3,1]+c.m_prun_1[3,2]+c.m_prun_1[3,3]+c.m_prun_1[3,4]+c.m_prun_1[3,5]+c.m_prun_1[3,6]+c.m_prun_1[3,7]+
+                c.m_prun_1[4,1]+c.m_prun_1[4,2]+c.m_prun_1[4,3]+c.m_prun_1[4,4]+c.m_prun_1[4,5]+c.m_prun_1[4,6]+c.m_prun_1[4,7]+
+                c.m_prun_1[5,1]+c.m_prun_1[5,2]+c.m_prun_1[5,3]+c.m_prun_1[5,4]+c.m_prun_1[5,5]+c.m_prun_1[5,6]+c.m_prun_1[5,7]+
+                c.m_prun_1[6,1]+c.m_prun_1[6,2]+c.m_prun_1[6,3]+c.m_prun_1[6,4]+c.m_prun_1[6,5]+c.m_prun_1[6,6]+c.m_prun_1[6,7]+
+                c.m_prun_1[7,1]+c.m_prun_1[7,2]+c.m_prun_1[7,3]+c.m_prun_1[7,4]+c.m_prun_1[7,5]+c.m_prun_1[7,6]+c.m_prun_1[7,7]))
+Accuracy_p1
+##62.96%
+## Accuracy of decision tree model reduces in compare to decsion tree without pruninig
+
+
+## pruning tree again with lowest 'CP' value in latest decision tree 
+rtree_fit_prune_2= rpart(Cover_Type~.-Id 	, data=forest_train,  method = "class", cp=0.017014)
+rpart.plot(rtree_fit_prune_2,main="Tree After 2nd Pruning")
+printcp(rtree_fit_prune_2)
+pred_prune_2=predict(rtree_fit_prune_2,forest_train, type = "class")
+table(pred_prune_2)
+c.m_prun_2=table(pred_prune_2, forest_train$Cover_Type)
+c.m_prun_2
+Accuracy_p2= ((c.m_prun_2[1,1]+c.m_prun_2[2,2]+c.m_prun_2[3,3]+c.m_prun_2[4,4]+c.m_prun_2[5,5]+c.m_prun_2[6,6]+c.m_prun_2[7,7])/
+               (c.m_prun_2[1,1]+c.m_prun_2[1,2]+c.m_prun_2[1,3]+c.m_prun_2[1,4]+c.m_prun_2[1,5]+c.m_prun_2[1,6]+c.m_prun_2[1,7]+
+                  c.m_prun_2[2,1]+c.m_prun_2[2,2]+c.m_prun_2[2,3]+c.m_prun_2[2,4]+c.m_prun_2[2,5]+c.m_prun_2[2,6]+c.m_prun_2[2,7]+
+                  c.m_prun_2[3,1]+c.m_prun_2[3,2]+c.m_prun_2[3,3]+c.m_prun_2[3,4]+c.m_prun_2[3,5]+c.m_prun_2[3,6]+c.m_prun_2[3,7]+
+                  c.m_prun_2[4,1]+c.m_prun_2[4,2]+c.m_prun_2[4,3]+c.m_prun_2[4,4]+c.m_prun_2[4,5]+c.m_prun_2[4,6]+c.m_prun_2[4,7]+
+                  c.m_prun_2[5,1]+c.m_prun_2[5,2]+c.m_prun_2[5,3]+c.m_prun_2[5,4]+c.m_prun_2[5,5]+c.m_prun_2[5,6]+c.m_prun_2[5,7]+
+                  c.m_prun_2[6,1]+c.m_prun_2[6,2]+c.m_prun_2[6,3]+c.m_prun_2[6,4]+c.m_prun_2[6,5]+c.m_prun_2[6,6]+c.m_prun_2[6,7]+
+                  c.m_prun_2[7,1]+c.m_prun_2[7,2]+c.m_prun_2[7,3]+c.m_prun_2[7,4]+c.m_prun_2[7,5]+c.m_prun_2[7,6]+c.m_prun_2[7,7]))
+Accuracy_p2
+## 60%
+plotcp(rtree_fit_prune_2)
+
+#####
+rtree_fit_prune_3= rpart(Cover_Type~.-Id 	, data=forest_train,  method = "class", cp=0.024691)
+rpart.plot(rtree_fit_prune_3,main="Tree After 3rd Pruning")
+printcp(rtree_fit_prune_3)
+pred_prune_3=predict(rtree_fit_prune_3,forest_train, type = "class")
+table(pred_prune_3)
+c.m_prun_3=table(pred_prune_3, forest_train$Cover_Type)
+c.m_prun_3
+plotcp(rtree_fit_prune_3)
+Accuracy_p3= ((c.m_prun_3[1,1]+c.m_prun_3[2,2]+c.m_prun_3[3,3]+c.m_prun_3[4,4]+c.m_prun_3[5,5]+c.m_prun_3[6,6]+c.m_prun_3[7,7])/
+               (c.m_prun_3[1,1]+c.m_prun_3[1,2]+c.m_prun_3[1,3]+c.m_prun_3[1,4]+c.m_prun_3[1,5]+c.m_prun_3[1,6]+c.m_prun_3[1,7]+
+                  c.m_prun_3[2,1]+c.m_prun_3[2,2]+c.m_prun_3[2,3]+c.m_prun_3[2,4]+c.m_prun_3[2,5]+c.m_prun_3[2,6]+c.m_prun_3[2,7]+
+                  c.m_prun_3[3,1]+c.m_prun_3[3,2]+c.m_prun_3[3,3]+c.m_prun_3[3,4]+c.m_prun_3[3,5]+c.m_prun_3[3,6]+c.m_prun_3[3,7]+
+                  c.m_prun_3[4,1]+c.m_prun_3[4,2]+c.m_prun_3[4,3]+c.m_prun_3[4,4]+c.m_prun_3[4,5]+c.m_prun_3[4,6]+c.m_prun_3[4,7]+
+                  c.m_prun_3[5,1]+c.m_prun_3[5,2]+c.m_prun_3[5,3]+c.m_prun_3[5,4]+c.m_prun_3[5,5]+c.m_prun_3[5,6]+c.m_prun_3[5,7]+
+                  c.m_prun_3[6,1]+c.m_prun_3[6,2]+c.m_prun_3[6,3]+c.m_prun_3[6,4]+c.m_prun_3[6,5]+c.m_prun_3[6,6]+c.m_prun_3[6,7]+
+                  c.m_prun_3[7,1]+c.m_prun_3[7,2]+c.m_prun_3[7,3]+c.m_prun_3[7,4]+c.m_prun_3[7,5]+c.m_prun_3[7,6]+c.m_prun_3[7,7]))
+
+Accuracy_p3
+##58.4%
+#############
+rtree_fit_prune_4= rpart(Cover_Type~.-Id 	, data=forest_train,  method = "class", cp=0.086188)
+rpart.plot(rtree_fit_prune_4,main="Tree After 4th Pruning")
+printcp(rtree_fit_prune_4)
+pred_prune_4=predict(rtree_fit_prune_4,forest_train, type = "class")
+table(pred_prune_4)
+c.m_prun_4=table(pred_prune_4, forest_train$Cover_Type)
+c.m_prun_4
+plotcp(rtree_fit_prune_4)
+Accuracy_p4= ((c.m_prun_4[1,1]+c.m_prun_4[2,2]+c.m_prun_4[3,3]+c.m_prun_4[4,4]+c.m_prun_4[5,5]+c.m_prun_4[6,6]+c.m_prun_4[7,7])/
+                (c.m_prun_4[1,1]+c.m_prun_4[1,2]+c.m_prun_4[1,3]+c.m_prun_4[1,4]+c.m_prun_4[1,5]+c.m_prun_4[1,6]+c.m_prun_4[1,7]+
+                   c.m_prun_4[2,1]+c.m_prun_4[2,2]+c.m_prun_4[2,3]+c.m_prun_4[2,4]+c.m_prun_4[2,5]+c.m_prun_4[2,6]+c.m_prun_4[2,7]+
+                   c.m_prun_4[3,1]+c.m_prun_4[3,2]+c.m_prun_4[3,3]+c.m_prun_4[3,4]+c.m_prun_4[3,5]+c.m_prun_4[3,6]+c.m_prun_4[3,7]+
+                   c.m_prun_4[4,1]+c.m_prun_4[4,2]+c.m_prun_4[4,3]+c.m_prun_4[4,4]+c.m_prun_4[4,5]+c.m_prun_4[4,6]+c.m_prun_4[4,7]+
+                   c.m_prun_4[5,1]+c.m_prun_4[5,2]+c.m_prun_4[5,3]+c.m_prun_4[5,4]+c.m_prun_4[5,5]+c.m_prun_4[5,6]+c.m_prun_4[5,7]+
+                   c.m_prun_4[6,1]+c.m_prun_4[6,2]+c.m_prun_4[6,3]+c.m_prun_4[6,4]+c.m_prun_4[6,5]+c.m_prun_4[6,6]+c.m_prun_4[6,7]+
+                   c.m_prun_4[7,1]+c.m_prun_4[7,2]+c.m_prun_4[7,3]+c.m_prun_4[7,4]+c.m_prun_4[7,5]+c.m_prun_4[7,6]+c.m_prun_4[7,7]))
+Accuracy_p4
+##56.35%
+###########
+rtree_fit_prune_5= rpart(Cover_Type~.-Id 	, data=forest_train,  method = "class", cp=0.100231)
+rpart.plot(rtree_fit_prune_5,main="Tree After 5th Pruning")
+printcp(rtree_fit_prune_5)
+pred_prune_5=predict(rtree_fit_prune_5,forest_train, type = "class")
+table(pred_prune_5)
+c.m_prun_5=table(pred_prune_5, forest_train$Cover_Type)
+c.m_prun_5
+plotcp(rtree_fit_prune_5)
+Accuracy_p5= ((c.m_prun_5[1,1]+c.m_prun_5[2,2]+c.m_prun_5[3,3]+c.m_prun_5[4,4]+c.m_prun_5[5,5]+c.m_prun_5[6,6]+c.m_prun_5[7,7])/
+               (c.m_prun_5[1,1]+c.m_prun_5[1,2]+c.m_prun_5[1,3]+c.m_prun_5[1,4]+c.m_prun_5[1,5]+c.m_prun_5[1,6]+c.m_prun_5[1,7]+
+                  c.m_prun_5[2,1]+c.m_prun_5[2,2]+c.m_prun_5[2,3]+c.m_prun_5[2,4]+c.m_prun_5[2,5]+c.m_prun_5[2,6]+c.m_prun_5[2,7]+
+                  c.m_prun_5[3,1]+c.m_prun_5[3,2]+c.m_prun_5[3,3]+c.m_prun_5[3,4]+c.m_prun_5[3,5]+c.m_prun_5[3,6]+c.m_prun_5[3,7]+
+                  c.m_prun_5[4,1]+c.m_prun_5[4,2]+c.m_prun_5[4,3]+c.m_prun_5[4,4]+c.m_prun_5[4,5]+c.m_prun_5[4,6]+c.m_prun_5[4,7]+
+                  c.m_prun_5[5,1]+c.m_prun_5[5,2]+c.m_prun_5[5,3]+c.m_prun_5[5,4]+c.m_prun_5[5,5]+c.m_prun_5[5,6]+c.m_prun_5[5,7]+
+                  c.m_prun_5[6,1]+c.m_prun_5[6,2]+c.m_prun_5[6,3]+c.m_prun_5[6,4]+c.m_prun_5[6,5]+c.m_prun_5[6,6]+c.m_prun_5[6,7]+
+                  c.m_prun_5[7,1]+c.m_prun_5[7,2]+c.m_prun_5[7,3]+c.m_prun_5[7,4]+c.m_prun_5[7,5]+c.m_prun_5[7,6]+c.m_prun_5[7,7]))
+Accuracy_p5
+##48.96%
+## it comes out from the above analysis that in this case pruning doesn't effect the accuracy of first decision tree. 
+## so, to improve the efficency of decsion tree now we use a new model technique called " Random Forest"
+
+
+
+#################################################################################################
+##############                 Random Forest                 ####################################
+#################################################################################################
+## to improve the accuracy of the decision treel model random forest technique is used
+install.packages("randomForest") #for implementing random forest modeling technique
+library(randomForest)
+
+## fitting random forest modeling
+rtree_Fit_randomForest= randomForest(Cover_Type~.-Id 	, data=forest_train, ntree=500)
+
+summary(rtree_Fit_randomForest)
+
+
+##print option also able to print the Confusion Matrix.
+print(rtree_Fit_randomForest)
+
+## confusion Matrix of random Forest
+c.m_r.f <- rtree_Fit_randomForest$confusion
+c.m_r.f
+Accuracy_RF=((c.m_r.f[1,1]+c.m_r.f[2,2]+c.m_r.f[3,3]+c.m_r.f[4,4]+c.m_r.f[5,5]+c.m_r.f[6,6]+c.m_r.f[7,7])/
+               (c.m_prun_5[1,1]+c.m_r.f[1,2]+c.m_r.f[1,3]+c.m_r.f[1,4]+c.m_r.f[1,5]+c.m_r.f[1,6]+c.m_r.f[1,7]+
+                  c.m_r.f[2,1]+c.m_r.f[2,2]+c.m_r.f[2,3]+c.m_r.f[2,4]+c.m_r.f[2,5]+c.m_r.f[2,6]+c.m_r.f[2,7]+
+                  c.m_r.f[3,1]+c.m_r.f[3,2]+c.m_r.f[3,3]+c.m_r.f[3,4]+c.m_r.f[3,5]+c.m_r.f[3,6]+c.m_r.f[3,7]+
+                  c.m_r.f[4,1]+c.m_r.f[4,2]+c.m_r.f[4,3]+c.m_r.f[4,4]+c.m_r.f[4,5]+c.m_r.f[4,6]+c.m_r.f[4,7]+
+                  c.m_r.f[5,1]+c.m_r.f[5,2]+c.m_r.f[5,3]+c.m_r.f[5,4]+c.m_r.f[5,5]+c.m_r.f[5,6]+c.m_r.f[5,7]+
+                  c.m_r.f[6,1]+c.m_r.f[6,2]+c.m_r.f[6,3]+c.m_r.f[6,4]+c.m_r.f[6,5]+c.m_r.f[6,6]+c.m_r.f[6,7]+
+                  c.m_r.f[7,1]+c.m_r.f[7,2]+c.m_r.f[7,3]+c.m_r.f[7,4]+c.m_r.f[7,5]+c.m_r.f[7,6]+c.m_r.f[7,7]))
+Accuracy_RF
+##Accuracy 84.27%
+
+## predicting cover type in test data
+pred_randomForest=predict(rtree_Fit_randomForest,forest_train, type = "class")
+
+##saving final result
+write.csv(predicted_1,"final_result_1.csv")
+
+## saving all grapf in a single pdf
+pdf("Forest.pdf",width=7,height=5)
+ggplot(forest_train,  aes(x = Cover_Type, fill= Cover_Type ) ) + geom_bar()+ ggtitle("Count of No. Cover Type") +
+  xlab("Cover Type") + ylab("Count")
+ggplot(forest_train_1, aes(Wilderness_Area, fill= Cover_Type)) + geom_bar()+ggtitle("Count of Cover Type as per Different Wilderness Area") +
+  xlab("Type Of Wilderness Area") + ylab("Count")
+ggplot(forest_train_1, aes(Wilderness_Area, fill= Cover_Type)) + 
+  geom_bar(position = "fill") +ggtitle("Count of Cover Type as per Different Wilderness Area in 100% stack Bar Graph") +
+  xlab("Type Of Wilderness Area") + ylab("Count")
+ggplot(forest_train_1, aes(Cover_Type,Horizontal_Distance_To_Hydrology, Fill=Cover_Type)) + 
+  geom_bar(stat = "summary", fun.y= "mean")+ggtitle("Mean Horizontal Distance of each cover type from Hydrology ") +
+  xlab("Cover Type") + ylab("Mean Distance")
+ggplot(forest_train_1, aes(Cover_Type,Vertical_Distance_To_Hydrology, Fill=Cover_Type)) + 
+  geom_bar(stat = "summary", fun.y= "mean")+ggtitle("Mean Vertical Distance of each cover type from Hydrology ") +
+  xlab("Cover Type") + ylab("Mean Distance")
+ggplot(forest_train_1, aes(Cover_Type,Horizontal_Distance_To_Roadways, Fill=Cover_Type)) + 
+  geom_bar(stat = "summary", fun.y= "mean")+ggtitle("Mean  Distance of each cover type from Roadways ") +
+  xlab("Cover Type") + ylab("Mean Distance")
+ggplot(forest_train_1, aes(Cover_Type,Horizontal_Distance_To_Fire_Points, Fill=Cover_Type)) + 
+  geom_bar(stat = "summary", fun.y= "mean")+ggtitle("Mean Distance of each cover type from Fire Point ") +
+  xlab("Cover Type") + ylab("Mean Distance")
+ggplot(forest_train_1, aes(Cover_Type,Elevation, Fill=Cover_Type)) + 
+  geom_bar(stat = "summary", fun.y= "mean") +ggtitle("Mean Elevation ") +
+  xlab("Cover Type") + ylab("Mean Elevation")
+ggplot(forest_train_1, aes(Cover_Type, Aspect, Fill=Cover_Type)) + 
+  geom_bar(stat = "summary", fun.y= "mean")+ggtitle("Mean Aspect ") +
+  xlab("Cover Type") + ylab("Aspect")
+rpart.plot(rtree_fit_all,main="Main Tree Plot")
+plotcp(rtree_fit_all,main="CP value Chart of Main Tree")
+rpart.plot(rtree_fit_prune_1,main="Tree After first Pruning")
+rpart.plot(rtree_fit_prune_2,main="Tree After 2nd Pruning")
+rpart.plot(rtree_fit_prune_3,main="Tree After 3rd Pruning")
+rpart.plot(rtree_fit_prune_4,main="Tree After 4th Pruning")
+rpart.plot(rtree_fit_prune_5,main="Tree After 5th Pruning")
+dev.off()
